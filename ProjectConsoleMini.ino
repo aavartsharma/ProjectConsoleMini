@@ -23,13 +23,10 @@
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
 int state;
+int yc = 1;
 const char Made[] PROGMEM = "Made By"; 
 const char NAME[] PROGMEM =  "Vart Innovations";
 const char PressB[] PROGMEM = "Press Start Button!";
-// const char MainMenu[] PROGMEM = "Main Menu";
-// const char Galaga[] = "Galaga";
-// const char Snake[] = "Snake";
-// const char Flappy_Brid[] = "Flappy Brid";
 const char MainMenu = 1;
 const int Galaga = 2;
 const int Snake = 3;
@@ -66,10 +63,10 @@ void setup()
   u8g2.clearBuffer();
   u8g2.setFont(u8g2_font_helvB08_tf);
   strcpy_P(buffer, Made);
-  u8g2.drawStr(5,20,buffer);
+  u8g2.drawStr((byte)5,(byte)20,buffer);
   u8g2.setFont(u8g2_font_helvB10_tf);
   strcpy_P(buffer, NAME);
-  u8g2.drawStr(5, 45,buffer);
+  u8g2.drawStr((byte)5, (byte)45,buffer);
   u8g2.sendBuffer();
   delay(2000);
   u8g2.clearBuffer();
@@ -78,7 +75,7 @@ void setup()
   u8g2.clearBuffer();
   u8g2.setFont(u8g2_font_helvB08_tf);
   strcpy_P(buffer, PressB);
-  u8g2.drawStr(10,40,buffer);
+  u8g2.drawStr((byte)10,(byte)40,buffer);
   u8g2.sendBuffer();
   while (true)
   {
@@ -97,24 +94,23 @@ void loop()
   Serial.println(state == MainMenu);
   if(state == MainMenu)
   {
-    int yc = 1;
     while(true)
     {
       u8g2.clearBuffer();
       u8g2.setFont(u8g2_font_helvB10_tf);
       strcpy_P(buffer, (PGM_P)F("Galaga"));
       u8g2.drawStr(15,15,buffer);
-      u8g2.drawLine(00, 20, 127, 20);
+      u8g2.drawLine((byte)00, (byte)20, (byte)127,(byte) 20);
       strcpy_P(buffer, (PGM_P)F("Snake"));
-      u8g2.drawStr(15,40,buffer);
-      u8g2.drawLine(00, 45, 127, 45);
+      u8g2.drawStr((byte)15,(byte)40,buffer);
+      u8g2.drawLine((byte)00, (byte)45, (byte)127, (byte)45);
       strcpy_P(buffer, (PGM_P)F("Flappy Brid"));
-      u8g2.drawStr(15,60,buffer);
-      u8g2.drawLine(00, 63, 127, 63);
-      u8g2.drawDisc(111,11*(yc*2-1), 5);
+      u8g2.drawStr((byte)15,(byte)60,buffer);
+      u8g2.drawLine((byte)00, (byte)63, (byte)127, (byte)63);
+      u8g2.drawDisc((byte)111,11*(yc*2-1), (byte)5);
       u8g2.sendBuffer();
       yc -= Nav_Button().y;
-      delay(100);
+      delay((byte)100);
       if(yc >= 4)
       {
         yc = 1;
@@ -140,30 +136,26 @@ void loop()
         break;
       }
     }
+    arraySize = 0;
+    arraySizeEnemy = 0;
+    for(int i = 1; i < 4; i++)
+    {
+      u8g2.clearBuffer();
+      u8g2.setFont(u8g2_font_helvB14_tf);
+      char str[3];                        // Create a char array to hold the string
+      itoa(i, str, 10);
+      u8g2.drawStr((byte)60,(byte)32,str);
+      u8g2.drawLine((byte)0, (byte)0,(byte) 127,(byte)0);
+      u8g2.drawLine((byte)127,(byte) 0, (byte)127,(byte)63);
+      u8g2.drawLine((byte)127, (byte)63,(byte)0, (byte)63);
+      u8g2.drawLine((byte)0, (byte)127,(byte) 0,(byte)0);
+      u8g2.sendBuffer();
+      delay(1000);
+    }
+    DirectVector playerPosition;
     if(state == Galaga)
     {
-      // for (int i = 0; i < MAX_SHOOT; i++) 
-      // {
-      //   shotList[i] = 0;
-      // }
-      arraySize = 0;
-      arraySizeEnemy = 0;
-      for(int i = 1; i < 4; i++)
-      {
-        u8g2.clearBuffer();
-        u8g2.setFont(u8g2_font_helvB14_tf);
-        char str[3];                        // Create a char array to hold the string
-        itoa(i, str, 10);
-        u8g2.drawStr(60,32,str);
-        u8g2.drawLine(0, 0, 127,0);
-        u8g2.drawLine(127, 0, 127,63);
-        u8g2.drawLine(127, 63,0, 63);
-        u8g2.drawLine(0, 127, 0,0);
-        u8g2.sendBuffer();
-        delay(1000);
-      }
-      DirectVector playerPosition;
-      
+      Serial.println(state);
       playerPosition.x = 10;
       playerPosition.y = 32;
       while(true)
@@ -174,10 +166,10 @@ void loop()
         }
         u8g2.clearBuffer();
         
-        u8g2.drawLine(0, 0, 127,0);
-        u8g2.drawLine(127, 0, 127,63);
-        u8g2.drawLine(127, 63,0, 63);
-        u8g2.drawLine(0, 127, 0,0);
+        u8g2.drawLine((byte)0, (byte)0, (byte)127,(byte)0);
+        u8g2.drawLine((byte)127, (byte)0, (byte)127,(byte)63);
+        u8g2.drawLine((byte)127, (byte)63,(byte)0, (byte)63);
+        u8g2.drawLine((byte)0, (byte)127, (byte)0,(byte)0);
         // playerPosition.x += Nav_Button().x;   // can be use to move player forward and backwards
         playerPosition.y -= Nav_Button().y;
         if(playerPosition.x >= 128)
@@ -188,9 +180,9 @@ void loop()
         {
           playerPosition.x = 0;
         }
-        if(playerPosition.y >= 51)
+        if(playerPosition.y >= 56)
         {
-          playerPosition.y = 50;
+          playerPosition.y = 55;
         }
         if(playerPosition.y <= 4)
         { 
@@ -207,7 +199,7 @@ void loop()
         {
           DirectVector place;
           place.x = 115;
-          place.y = random(8,56);
+          place.y = random(8,55);
           addEnemy(place);
         }
         Draw_player(playerPosition);
@@ -224,9 +216,6 @@ void loop()
         for (int i = 0; i < arraySizeEnemy; i++)
         {
           DrawEnemy(enemyList[i]);
-          // Serial.print(enemyList[i].x);
-          // Serial.print("     ");
-          // Serial.println(enemyList[i].y);
           enemyList[i].x -= 1;
           if(enemyList[i].x <= 20)
           {
@@ -234,7 +223,7 @@ void loop()
             u8g2.clearBuffer();
             u8g2.setFont(u8g2_font_helvB14_tf);
             strcpy_P(buffer, (PGM_P)F("Game Over!"));
-            u8g2.drawStr(10,32,buffer);
+            u8g2.drawStr((byte)10,(byte)32,buffer);
             u8g2.sendBuffer();
             delay(5000);
             state = MainMenu;
@@ -242,48 +231,115 @@ void loop()
           }
           for (int j =0; j < arraySize; j++)
           {
-            // Serial.print(enemyList[i].y + 5 );
-            // Serial.print("   ");
-            // Serial.print(shotList[j].y );
-            // Serial.print("   ");
-            // Serial.println(enemyList[i].y - 5);
-            // Serial.print("   ");
-            // Serial.println(((enemyList[i].y + 5) > shotList[j].y > (enemyList[i].y - 5)));
             if(((enemyList[i].x + 5) > shotList[j].x) && (shotList[j].x > (enemyList[i].x - 5)) && ((enemyList[i].y + 5) > shotList[j].y) && (shotList[j].y > (enemyList[i].y - 5)))
             {
               removeElement(j);
               removeEnemy(i);
             }
-
           }
         }
         u8g2.sendBuffer();
         delay(25);
       }
     }
-    
+    if(state == Snake)
+    {
+      playerPosition.x = 64;
+      playerPosition.y = 32;
+      DirectVector dir;
+      DirectVector enemyPos;
+      enemyPos.x = 0;
+      enemyPos.y = 0;
+      int score =0;
+      dir.x = 1;
+      dir.y = 0;
+      while(true)
+      {
+        if(state == MainMenu)
+        {
+          break;
+        }
+        u8g2.clearBuffer();
+        
+        u8g2.drawLine((byte)0, (byte)0, (byte)127,(byte)0);
+        u8g2.drawLine((byte)127, (byte)0, (byte)127,(byte)50);
+        u8g2.drawLine((byte)127, (byte)50,(byte)0, (byte)50);
+        u8g2.drawLine((byte)0, (byte)50, (byte)0,(byte)0);
+        char str[3]; 
+        itoa(score, str, 10);
+        u8g2.setFont(u8g2_font_helvB08_tf);
+        u8g2.drawStr(20,60,str);
+        if(digitalRead(MENU_START))
+        {
+          state = MainMenu;
+        }
+        if(Nav_Button().x > 0 && dir.x != -1)
+        {
+          dir.x = 1;
+          dir.y = 0;
+        }
+        if(Nav_Button().x < 0 && dir.x != 1)
+        {
+          dir.x = -1;
+          dir.y = 0;
+        }
+        if(Nav_Button().y > 0 && dir.y != -1)
+        {
+          dir.x = 0;
+          dir.y = 1;
+        }
+        if(Nav_Button().y < 0 && dir.y != 1)
+        {
+          dir.x = 0;
+          dir.y = -1;
+        }
+
+        playerPosition.x += dir.x;
+        playerPosition.y -= dir.y;
+
+        // position cheak
+        if(playerPosition.x >= 127)
+        {
+          playerPosition.x = 1;
+        }
+        if(playerPosition.x <= 0)
+        {
+          playerPosition.x = 126;
+        }
+        if(playerPosition.y >= 45)
+        {
+          playerPosition.y = 1;
+        }
+        if(playerPosition.y <= 0)
+        { 
+          playerPosition.y = 44;
+        }
+        if(enemyPos.x != 0)
+        {
+          u8g2.drawDisc(enemyPos.x+3,enemyPos.y+3,3);
+        }
+        if(enemyPos.x == 0)
+        {
+          enemyPos.x = random(1,125);
+          enemyPos.y = random(1,44);
+        }
+        DrawShot(playerPosition); // player
+        if( (playerPosition.x > (enemyPos.x-3)) && (playerPosition.x < (enemyPos.x + 3)) && (playerPosition.y > (enemyPos.y - 3)) && (playerPosition.y < (enemyPos.y + 3)))
+        {
+          enemyPos.x = 0;
+          score++;
+        }
+        u8g2.sendBuffer();
+        delay(25);
+      }
+    }
   }
-  
-  //   String b = String(digitalRead(MENU_PAUSE));
-  //   String c = String(digitalRead(MENU_SELECT));
-  //   String d = String(digitalRead(ACTION_O));
-  //   String e = String(digitalRead(ACTION_X));
-  //   Serial.println(b);
-  //   Serial.println(c);
-  //   Serial.println(d);
-  //   Serial.println(e);
-  //   delay(100);
+}
 
-  // u8g2.clearBuffer();
-
-  // // Draw a rectangle
-  // u8g2.drawBox(10, 10, 50, 30); // x, y, width, height
-
-  // // Draw a circle
-  // u8g2.drawCircle(90, 32, 20); // x, y (center), radius
-
-  // u8g2.sendBuffer();
-  // delay(1000);
+void drawThickLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t thickness) {
+  for (int i = 0; i < thickness; i++) {
+    u8g2.drawLine(x0, y0 + i, x1, y1 + i); // For a horizontal thick line
+  }
 }
 
 void addElement(DirectVector newElement) 
@@ -324,20 +380,21 @@ void removeEnemy(int index)
 
 void Draw_player(DirectVector pos) 
 {
-  for (int i = 0; i < 9; i++) 
+  for (int i = 0; i < 6; i++) 
   {
     for (int j = 0; j < 3; j++) 
     {
       u8g2.drawPixel(pos.x + j, pos.y + i);
     }
   }
-  u8g2.drawBox(pos.x , pos.y , 3, 9);
-  u8g2.drawBox(pos.x + 3, pos.y + 3, 3, 3);
+  u8g2.drawBox(pos.x , pos.y-3, 3,10);
+  u8g2.drawBox(pos.x + 3, pos.y , 3, 3);
 }
+
 
 void DrawShot(DirectVector pos)
 {
-  u8g2.drawBox(pos.x + 3, pos.y + 3, 3, 3);
+  u8g2.drawBox(pos.x, pos.y, 3, 3);
 }
 
 void DrawEnemy(DirectVector pos)
@@ -368,7 +425,5 @@ DirectVector Nav_Button()
   }
   return dir;
 }
-
-// void Show_menu
 
 
