@@ -1,0 +1,13 @@
+﻿Name,Quantity,Component
+"M1",1," Vibration Motor"
+"BAT1",1," 9V Battery"
+"S1",1," Slideswitch"
+"S2, S3, S4, S5, S6, S7, S8, S9",8," Pushbutton"
+"PIEZO1, PIEZO2",2," Piezo"
+"U1",1," Arduino Uno R3"
+"D1, D2",2," Diode"
+"C1",1,"4.2 uF, 50 V Polarized Capacitor"
+"R1, R3, R4, R5, R6, R2, R7, R8",8,"1 kΩ Resistor"
+"U2",1,"MCP23008-based, 32 (0x20) LCD 16 x 2 (I2C)"
+"T1",1," PNP Transistor (BJT)"
+"BAT3",1," Coin Cell 3V Battery"
