@@ -57,7 +57,6 @@ void setup()
 
   pinMode(BUZZER, OUTPUT);
 
-
   Serial.begin(9600);
   u8g2.begin();
   u8g2.clearBuffer();
@@ -188,10 +187,14 @@ void loop()
         { 
           playerPosition.y = 5;
         }
+        if(digitalRead(MENU_START))
+        {
+          state = MainMenu;
+        }
         if(digitalRead(ACTION_O))
         {
           DirectVector newShot;
-          newShot.x = 6 + playerPosition.x;
+          newShot.x = playerPosition.x + 6;
           newShot.y = playerPosition.y;
           addElement(newShot);
         }
@@ -210,6 +213,7 @@ void loop()
           if(shotList[i].x >= 128)
           {
             removeElement(i);
+            tone(A1, 400);
           }
         }
 
@@ -235,6 +239,7 @@ void loop()
             {
               removeElement(j);
               removeEnemy(i);
+              tone(A1, 400);
             }
           }
         }
@@ -273,61 +278,137 @@ void loop()
         {
           state = MainMenu;
         }
-        if(Nav_Button().x > 0 && dir.x != -1)
+        if(Nav_Button().x > 0 && dir.x != -1 && dir.x != 1)
         {
           dir.x = 1;
           dir.y = 0;
+          if (arraySize <= 10) addElement(playerPosition);
         }
-        if(Nav_Button().x < 0 && dir.x != 1)
+        if(Nav_Button().x < 0 && dir.x != 1 && dir.x !=-1)
         {
           dir.x = -1;
           dir.y = 0;
+          if (arraySize <= 10) addElement(playerPosition);
         }
-        if(Nav_Button().y > 0 && dir.y != -1)
+        if(Nav_Button().y > 0 && dir.y != -1 && dir.y != 1)
         {
           dir.x = 0;
           dir.y = 1;
+          if (arraySize <= 10) addElement(playerPosition);
         }
-        if(Nav_Button().y < 0 && dir.y != 1)
+        if(Nav_Button().y < 0 && dir.y != 1 && dir.y != -1)
         {
           dir.x = 0;
           dir.y = -1;
+          if (arraySize <= 10 ) addElement(playerPosition);
         }
-
         playerPosition.x += dir.x;
         playerPosition.y -= dir.y;
 
         // position cheak
-        if(playerPosition.x >= 127)
+        if(playerPosition.x >= 127 && inList(playerPosition))
         {
           playerPosition.x = 1;
         }
-        if(playerPosition.x <= 0)
+        if(playerPosition.x <= 0 && inList(playerPosition))
         {
           playerPosition.x = 126;
         }
-        if(playerPosition.y >= 45)
+        if(playerPosition.y >= 45 && inList(playerPosition))
         {
           playerPosition.y = 1;
         }
-        if(playerPosition.y <= 0)
+        if(playerPosition.y <= 0 && inList(playerPosition))
         { 
           playerPosition.y = 44;
         }
         if(enemyPos.x != 0)
         {
-          u8g2.drawDisc(enemyPos.x+3,enemyPos.y+3,3);
+          u8g2.drawDisc(enemyPos.x,enemyPos.y,3);
         }
         if(enemyPos.x == 0)
         {
           enemyPos.x = random(1,125);
           enemyPos.y = random(1,44);
         }
+        // DrawSnake(playerPosition, score+1);
         DrawShot(playerPosition); // player
-        if( (playerPosition.x > (enemyPos.x-3)) && (playerPosition.x < (enemyPos.x + 3)) && (playerPosition.y > (enemyPos.y - 3)) && (playerPosition.y < (enemyPos.y + 3)))
+        // u8g2.drawPixel(playerPosition.x, playerPosition.y);
+        // u8g2.drawPixel(playerPosition.x,playerPosition.y);
+        if( (playerPosition.x > (enemyPos.x-5)) && (playerPosition.x < (enemyPos.x + 5)) && (playerPosition.y > (enemyPos.y - 5)) && (playerPosition.y < (enemyPos.y + 5)))
         {
           enemyPos.x = 0;
           score++;
+          tone(A1, 400);
+        }
+        u8g2.sendBuffer();
+        delay(25);
+      }
+    }
+
+    if(state == Flappy_Brid)
+    {
+      playerPosition.x = 64;
+      playerPosition.y = 32;
+      DirectVector dir;
+      dir.x = 64;
+      dir.y =32;
+      int score =0;
+      while(true)
+      {
+        if(state == MainMenu)
+        {
+          break;
+        }
+        u8g2.clearBuffer();
+        
+        u8g2.drawLine((byte)0, (byte)0, (byte)127,(byte)0);
+        u8g2.drawLine((byte)127, (byte)0, (byte)127,(byte)50);
+        u8g2.drawLine((byte)127, (byte)50,(byte)0, (byte)50);
+        u8g2.drawLine((byte)0, (byte)50, (byte)0,(byte)0);
+        char str[3]; 
+        itoa(score, str, 10);
+        u8g2.setFont(u8g2_font_helvB08_tf);
+        u8g2.drawStr(20,60,str);
+        if(digitalRead(MENU_START))
+        {
+          state = MainMenu;
+        }
+        if(Nav_Button().y > 0)
+        {
+          playerPosition.y-=4;
+        }
+        else {
+          playerPosition.y +=1;
+        }
+        if( playerPosition.y > 50 || playerPosition.y < 0)
+        {
+          u8g2.clearBuffer();
+          u8g2.setFont(u8g2_font_helvB14_tf);
+          strcpy_P(buffer, (PGM_P)F("Game Over!"));
+          u8g2.drawStr((byte)10,(byte)32,buffer);
+          u8g2.sendBuffer();
+          delay(5000);
+          state = MainMenu;
+          break;
+        }
+        u8g2.drawBox(16, playerPosition.y, 7, 5); // player
+        if(millis() % 2000 <= 20)
+        {
+          dir.x = 110;
+          dir.y = random(5,25);
+          addElement(dir);
+        } 
+        for (int i =0; i < arraySize; i++)
+        {
+          DrawBlocks(shotList[i]);
+          shotList[i].x -= 1;
+          if(shotList[i].x <= -15)
+          {
+            removeElement(i);
+            score++;
+            tone(A1, 400);
+          }
         }
         u8g2.sendBuffer();
         delay(25);
@@ -357,6 +438,16 @@ void addEnemy(DirectVector newElement)
   {
     enemyList[arraySizeEnemy] = newElement;
     arraySizeEnemy++;
+  }
+}
+bool inList(DirectVector x)
+{
+  for (int i = 0; i < arraySize; i++) 
+  {
+    if (shotList[i].x == x.x && shotList[i].y == x.y) 
+    {
+      return true;
+    }
   }
 }
 
@@ -391,7 +482,88 @@ void Draw_player(DirectVector pos)
   u8g2.drawBox(pos.x + 3, pos.y , 3, 3);
 }
 
+void DrawBlocks(DirectVector pos)
+{
+  // randome
+  int h1 = pos.y;
+  u8g2.drawBox(pos.x, 0, 10, h1);
+  u8g2.drawBox(pos.x,h1+25,10, 25-h1);
 
+}
+
+void DrawSnake(DirectVector pos, int length)
+{
+  int totalLength = 0;  // Track total drawn length
+  int segmentLength = 0;  // Length of each segment
+  
+  // First, handle the head of the snake
+  if (shotList[0].x == pos.x && shotList[0].y == pos.y) {
+    // Handle when the snake hasn't moved much yet
+    u8g2.drawPixel(pos.x, pos.y);  // Draw head
+    return;
+  }
+
+  // Draw the lines between each turn point in shotList
+  for (int i = 0; i < arraySize - 1; i++) {
+    // Calculate the length of the line segment between shotList[i] and shotList[i + 1]
+    if (shotList[i].x == shotList[i + 1].x) {
+      // Vertical line
+      segmentLength = abs(shotList[i].y - shotList[i + 1].y);
+    } else if (shotList[i].y == shotList[i + 1].y) {
+      // Horizontal line
+      segmentLength = abs(shotList[i].x - shotList[i + 1].x);
+    } else {
+      // Not a straight line, show an error
+      strcpy_P(buffer, (PGM_P)F("Error 483"));
+      u8g2.drawStr(64, 32, buffer);
+      return;
+    }
+    
+    // Check if drawing the full segment would exceed the snake's length
+    if (totalLength + segmentLength > length) {
+      // Calculate how much of the segment to draw to match the desired length
+      int remainingLength = length - totalLength;
+
+      // Draw only part of the current segment
+      if (shotList[i].x == shotList[i + 1].x) {
+        // Vertical line
+        if (shotList[i].y < shotList[i + 1].y) {
+          // Moving down
+          u8g2.drawLine(shotList[i].x, shotList[i].y, shotList[i + 1].x, shotList[i].y + remainingLength);
+        } else {
+          // Moving up
+          u8g2.drawLine(shotList[i].x, shotList[i].y, shotList[i + 1].x, shotList[i].y - remainingLength);
+        }
+      } else if (shotList[i].y == shotList[i + 1].y) {
+        // Horizontal line
+        if (shotList[i].x < shotList[i + 1].x) {
+          // Moving right
+          u8g2.drawLine(shotList[i].x, shotList[i].y, shotList[i].x + remainingLength, shotList[i].y);
+        } else {
+          // Moving left
+          u8g2.drawLine(shotList[i].x, shotList[i].y, shotList[i].x - remainingLength, shotList[i].y);
+        }
+      }
+      return;  // Snake is fully drawn, stop here
+    } else {
+      // Draw the full segment
+      u8g2.drawLine(shotList[i].x, shotList[i].y, shotList[i + 1].x, shotList[i + 1].y);
+      totalLength += segmentLength;  // Update the total drawn length
+    }
+  }
+}
+
+
+
+
+void DrawSnakeNew(DirectVector dir, int length)
+{
+  u8g2.drawPixel(dir.x, dir.y);
+  for (int i =1; i<=length; i++)
+  {
+
+  }
+}
 void DrawShot(DirectVector pos)
 {
   u8g2.drawBox(pos.x, pos.y, 3, 3);
